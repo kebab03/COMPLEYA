@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Toggle Switch</title>
+    <style>
+        body {
+            text-align: center;
+            background: #130f12;
+        }
+
+        .toggle-btn.active + h3 {
+            color: white;
+        }
+
+        .toggle-btn + h3 {
+            color: rgb(138, 208, 33);
+        }
+
+        .wrapper {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .toggle-btn {
+            width: 80px;
+            height: 40px;
+            border-radius: 30px;
+            padding: 5px;
+            transition: all 300ms ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            margin: 30px;
+            position: relative;
+            overflow: hidden;
+            background-color: gray;
+        }
+
+        .toggle-btn.active {
+            background-color: #21f3e5;
+            box-shadow: 0 0 10px #2196f3, 0 0 40px #2196f3, 0 0 80px #2196f3;
+            transition-delay: 0.5s;
+        }
+
+        .toggle-btn .inner-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 300ms ease-in-out;
+            background: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateX(0%);
+        }
+
+        .toggle-btn.active .inner-circle {
+            transform: translateX(100%);
+        }
+
+        .toggle-btn .label {
+            color: #fd077a;
+            font-size: 24px;
+            position: relative;
+            top: 0px;
+            left: 5px;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+  <div class="wrapper">
+    {% for i in range(num_buttons) %}
+    <div class="progress">
+      <button class="toggle-btn {{ 'active' if button_states[i] == 'on' else '' }}" onclick="toggleSwitch({{ i }})">
+        <div class="inner-circle"></div>
+        <div class="label">{{ button_labels[i] }}</div>
+      </button>
+      <h3 id="state{{ i }}">{% if button_states[i] == 'on' %}{{ button_labels[i] }} is currently ON{% else %}{{ button_labels[i] }} is currently OFF{% endif %}</h3>
+
+    </div>
+    {% endfor %}
+  </div>
+  <script>
+    const numButtons = {{ num_buttons }};
+    const buttonStates = {{ button_states }};
+    const buttonLabels = {{ button_labels }};
+
+    function toggleSwitch(index) {
+      fetch("/toggle-state", {
+        method: "POST",
+        body: JSON.stringify({ index: index })
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        const toggleBtns = document.getElementsByClassName("toggle-btn");
+        const h3Elements = document.querySelectorAll("h3");
+
+        for (let i = 0; i < numButtons; i++) {
+          if (i === index) {
+            toggleBtns[i].classList.toggle("active", data.switch === "on");
+          }
+          h3Elements[i].innerHTML = `${buttonLabels[i]} is currently ${data.states[i].toUpperCase()}`;
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
